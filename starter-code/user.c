@@ -82,5 +82,5 @@ void loop(void)
         scan_color();
     }
 
-    emwrite(0); //  This will output a WAIT command -- which basically does nothing.
+    //emwrite(0); //  This will output a WAIT command -- which basically does nothing.
 }
