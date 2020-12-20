@@ -58,13 +58,17 @@ void setup(void)
     emwrite(1, 100); // Initialise the left motor.
     emwrite(1, 101); // right motor
     emwrite(1, 6); // mag sensor
-    emwrite(2, 6, -20, -40);
+    emwrite(2, 6, -15, -40);
     emwrite(1, 7); // mag sesor
-    emwrite(2, 7, 20, -40);
+    emwrite(2, 7, 15, -40);
     emwrite(1, 15); // IR
-    emwrite(2, 15, 12.5, -40, 2*pi);
+    emwrite(2, 15, -12, -40, 2*pi);
     emwrite(1, 16); // IR
-    emwrite(2, 16, -12.5, -40, 2*pi);
+    emwrite(2, 16, 12, -40, 2*pi);
+    emwrite(1, 10); //line sensor
+    emwrite(2, 10, -25, -40);
+    emwrite(1, 11); //line sensor
+    emwrite(2, 11, 25, -40);
 
     //  N.B. You can only initialise and configure components within this function.
     //       (Of course, you can still call another function which does the init.)
