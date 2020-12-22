@@ -47,14 +47,16 @@ void scan_color(){
     }
 }
 
+float pi = 3.14159265359;
+
 void setup(void)
 {
     //  Initialise your program here.
     //  This function will be called once before loop().
-
     //  You will probably want to start out by initialising some components.
     emwrite(1, 5); // Initialise the camera.
-    emwrite(2, 5, -10, -10, -80.15);  // Position the camera at an offset of (0, 20) cm and with no angular offset.
+    //emwrite(2, 5, -10, -10, -80.15);  // Position the camera at an offset of (0, 20) cm and with no angular offset.
+    emwrite(2, 5, 0, 0, 1.57);
     emwrite(1, 100); // Initialise the left motor.
     emwrite(1, 101); // right motor
     emwrite(1, 6); // mag sensor
@@ -69,10 +71,29 @@ void setup(void)
     emwrite(2, 10, -25, -40);
     emwrite(1, 11); //line sensor
     emwrite(2, 11, 25, -40);
+    emwrite(1, 200); //grabbing mech
+    emwrite(2, 200, 28, -40, 0);
+    emwrite(1, 201); //throwing mech
+    emwrite(2, 201, -53, 40, 0);
+
+    /*
+    emwrite(3, 20, 0, 24.0); // Set wheel motor 0 voltage to 24V.
+    emwrite(3, 21, 0, 12.0); // Set wheel motor 1 voltage to 12V.
+    emwrite(4, 5); // Request camera input on the next iteration.
+
+    emwrite(10, 0); // Release the grabber.
+    emwrite(10, 1); // Grab a tennis ball.
+
+    emwrite(11); // Throw the ball.*/
 
     //  N.B. You can only initialise and configure components within this function.
     //       (Of course, you can still call another function which does the init.)
 }
+
+bool is_data_requested = false;
+bool stop = false;
+int num_of_turn = 0;
+int num_of_true = 0;
 
 void loop(void)
 {
@@ -85,6 +106,96 @@ void loop(void)
         //emwrite(0);
         scan_color();
     }
-
+  
+    else{    
+        if(is_data_requested){
+            int magid = 6; int magid2 = 7; int turns = 0;         ////Magnetic Sensor
+            int magvalue, magvalue2;
+            if(emread_magnetic_sensor(&magid, &magvalue)){ 
+                if(emread_magnetic_sensor(&magid2, &magvalue2)){
+                    emdebug("%d %d\n", magvalue, magvalue2);
+                    if((magvalue<130)&&(magvalue2>=130)){      //check turn right?
+                        emwrite(3, 100, 0, 20.0);
+                        emwrite(3, 101, 0, -20.0);
+                        if((magvalue>=130)&&(magvalue2<130)){
+                            emwrite(3, 100, 0, -20.0);
+                            emwrite(3, 101, 0, 20.0);
+                        }
+                    }
+                    else if((magvalue>=100)&&(magvalue2<100)){  //check trun left?
+                        emwrite(3, 100, 0, -20.0);
+                        emwrite(3, 101, 0, 20.0);
+                        if((magvalue<100)&&(magvalue2>=100)){
+                            emwrite(3, 100, 0, -20.0);
+                            emwrite(3, 101, 0, 20.0);
+                        }
+                    }
+                    else if((magvalue>=100)&&(magvalue2>=100)){  //check during turning
+                        if(magvalue>magvalue2){
+                            emwrite(3, 100, 0, 20.0);
+                            emwrite(3, 101, 0, 0.0);
+                            num_of_turn += 1;
+                        }
+                        else if(magvalue2>magvalue){
+                            emwrite(3, 100, 0, 0.0);
+                            emwrite(3, 101, 0, 20.0);
+                            num_of_turn += 1;
+                        }
+                    }
+                    else{
+                        emwrite(3, 100, 0, 24.0);
+                        emwrite(3, 101, 0, 24.0);
+                    }
+                    if(num_of_turn>21 && turns==0){       //after turning
+                        if(abs(magvalue-magvalue2)>30){
+                            if(magvalue>magvalue2){
+                                emwrite(3, 100, 0, -24.0);
+                                emwrite(3, 101, 0, 24.0);
+                            }
+                            else if(magvalue2>magvalue){
+                                emwrite(3, 100, 0, 24.0);
+                                emwrite(3, 101, 0, -24.0);
+                            }
+                        }
+                        else{
+                            emwrite(3, 100, 0, 24.0);
+                            emwrite(3, 101, 0, 24.0);
+                        }
+                    } 
+                  
+                    int irid = 15, irid2 = 16;                   ////IR Sensor
+                    int irvalue, irvalue2;
+                    bool grab_basket;
+                    if(emread_ir_sensor(&irid, &irvalue)){
+                        if(emread_ir_sensor(&irid2, &irvalue2)){
+                            emdebug("%d %d\n", irvalue,irvalue2);
+                            if(irvalue+irvalue2==4201474){
+                                if(num_of_true<45){
+                                    emwrite(3, 100, 0, 24.0);
+                                    emwrite(3, 101, 0, 24.0);
+                                    num_of_true += 1;
+                                }
+                                else{
+                                    emwrite(3, 100, 0, 0.0);
+                                    emwrite(3, 101, 0, 0.0);
+                                    emwrite(10, 3);
+                                    bool grab_basket = true;
+                                    turns += 1;
+                                    emwrite(3, 100, 0, -20.0);
+                                    emwrite(3, 101, 0, 20.0);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        emwrite(4, 6);
+        emwrite(4, 7);
+        emwrite(4, 15);
+        emwrite(4, 16);
+        is_data_requested = true;
+    }
+  
     //emwrite(0); //  This will output a WAIT command -- which basically does nothing.
 }
