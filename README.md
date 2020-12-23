@@ -1,3 +1,10 @@
+Submitting our work :
+For the starting, scan color, grabbing basket and going to the middle path,
+please go to "branch_Nicole" to find the video and inside the "starter code", "user.c" is my code.
+
+
+
+
 # A Brief Guide to the Emulator
 
 [![hackmd-github-badge](https://img.shields.io/badge/SW_RDC_Manual-View_on_HackMD-blue)](https://hackmd.io/@TrebledJ/BJWg_E78D)
