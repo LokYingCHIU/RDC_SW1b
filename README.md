@@ -1,4 +1,5 @@
 Submitting our work :
+
 For the starting, scan color, grabbing basket and going to the middle path,
 please go to "branch_Nicole" to find the video and inside the "starter code", "user.c" is my code.
 
